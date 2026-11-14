@@ -1,0 +1,33 @@
+name: Offline release preparation checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tap-preparation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Show existing runtime versions
+        run: |
+          python3 --version
+          python3 -c 'import sys; assert sys.version_info >= (3, 11)'
+          ruby --version
+      - name: Verify offline producer behavior
+        run: python3 -B -m unittest discover -s tests -v

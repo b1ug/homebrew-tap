@@ -2,6 +2,7 @@ name: Release preparation and native installation
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -81,6 +82,7 @@ jobs:
           assert version["version"] == "v" + release["version"]
           assert release["source_commit"] in human
           assert version["build"]["cgo_enabled"] is True
+          assert version["build"]["revision"] == "" and version["build"]["modified"] == "unknown"
           dependencies = {v["path"]: v["version"] for v in version["build"]["dependencies"]}
           assert dependencies["github.com/b1ug/blink1-go"] == "v0.0.2"
           assert dependencies["github.com/b1ug/gid"] == "v0.0.3"

@@ -45,7 +45,9 @@ Formula 把服务注册绑定到稳定的 Homebrew `opt` 路径。升级安装�
 
 ## 发布来源
 
-`Formula/nb1.rb` 与已核验发布源码内 renderer/template 的输出逐字节一致。[`releases/nb1-0.1.0.json`](releases/nb1-0.1.0.json)保存显式输入，旁边的来源记录保存 tag 对象、精确 source commit/tree、归档和 renderer/template 哈希。安装源不会使用 branch、Actions 产物或合成 fixture。
+`Formula/nb1.rb` 先由已核验发布源码中的 renderer/template 生成。仅针对精确 v0.1.0 源码与原始输出哈希，再应用四项已审包装修正：关闭父目录 Git 自动识别，并满足三条 Homebrew 严格样式规则。这样 Go 不会把外层 Homebrew 的 commit 误报为 nb1 来源。人类 `nb1 version` 输出仍保留显式 nb1 commit，JSON 的 VCS revision 在源码归档构建中为未知。修正不改上游 tag、程序代码、依赖或灯效，也不会套用于未来版本。
+
+[`releases/nb1-0.1.0.json`](releases/nb1-0.1.0.json)保存显式输入。旁边的来源记录保存 tag 对象、精确 source commit/tree、归档和 renderer/template 哈希、修正前后 Formula 哈希及各项理由。安装源不会使用 branch、Actions 产物或合成 fixture。
 
 准备工具先校验公开 Release、tag、源码归档中每个 Git blob，再运行对应版本的 renderer：
 

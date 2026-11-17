@@ -7,14 +7,14 @@ class Nb1 < Formula
   desc "Control blink(1) through a local CLI and daemon"
   homepage "https://github.com/b1ug/nb1"
   url "https://github.com/b1ug/nb1/archive/refs/tags/v0.1.0.tar.gz"
-  version "0.1.0"
   sha256 "6adc9912b87a8aa1fa8a8a956d0b81318ac24428bd2aa33073eb730ba17b9b13"
   license "MIT"
 
-  on_macos do
-    depends_on macos: "sequoia".to_sym
-  end
   depends_on "go" => :build
+
+  on_macos do
+    depends_on macos: :sequoia
+  end
 
   deny_network_access!
 
@@ -35,7 +35,7 @@ class Nb1 < Formula
                "-X", "github.com/b1ug/nb1/config.GitSummary=v#{version}",
                "-X", "github.com/b1ug/nb1/config.ServiceBinary=#{opt_bin}/nb1",
                "-X", "github.com/b1ug/nb1/config.ServiceBinaryRoot=#{rack}"]
-    system "go", "build", *std_go_args(output: bin/"nb1", ldflags: ldflags), "-mod=readonly", "."
+    system "go", "build", "-buildvcs=false", *std_go_args(output: bin/"nb1", ldflags: ldflags), "-mod=readonly", "."
     # Go's linker uses 0775 before umask. The installed service executable
     # must remain protected even when the caller's umask permits group writes.
     (bin/"nb1").chmod 0755

@@ -162,6 +162,32 @@ def verify_archive(raw, expected, commit):
     return selected, len(expanded)
 
 
+def adapt_formula(formula, value):
+    """Apply only the reviewed v0.1.0 source-build corrections, never future releases."""
+    if (value.get("version"), value.get("source_commit")) != (
+            "0.1.0", "535621a689e5a9e35c5e897aadcd4b023d2f157b"):
+        return formula, []
+    require(digest(formula) == "fa9e7a34f85f3a734f8bbc953fc878aab6d922e7da0479732ab61fd9df91bb1c",
+            "v0.1.0 adaptation requires the exact verified upstream Formula output")
+    changes = [
+        (b'  version "0.1.0"\n', b'', "infer_version", "Homebrew infers the same version from the immutable source URL."),
+        (b'    depends_on macos: "sequoia".to_sym\n', b'    depends_on macos: :sequoia\n',
+         "literal_macos_symbol", "Use the equivalent literal symbol required by strict style."),
+        (b'  on_macos do\n    depends_on macos: :sequoia\n  end\n  depends_on "go" => :build\n',
+         b'  depends_on "go" => :build\n\n  on_macos do\n    depends_on macos: :sequoia\n  end\n',
+         "dependency_order", "Put the same build dependency before the platform block for strict style."),
+        (b'    system "go", "build", *std_go_args(',
+         b'    system "go", "build", "-buildvcs=false", *std_go_args(',
+         "disable_parent_vcs", "Prevent Go from misidentifying Homebrew's enclosing Git repository as nb1 source; retain the explicit nb1 commit linker value."),
+    ]
+    applied = []
+    for before, after, name, reason in changes:
+        require(formula.count(before) == 1, "v0.1.0 adaptation context differs: " + name)
+        formula = formula.replace(before, after, 1)
+        applied.append({"id": name, "reason": reason})
+    return formula, applied
+
+
 def child_environment():
     result = {"PATH": os.defpath, "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8"}
     if "SYSTEMROOT" in os.environ:
@@ -273,12 +299,16 @@ def prepare(value, output, fetch=None):
         require(result.returncode == 0 and candidate.is_file() and not candidate.is_symlink(), "upstream renderer rejected input: " + result.stderr[-2000:])
         require(0 < candidate.stat().st_size <= MAX_INPUT, "rendered Formula is empty or exceeds size limit")
         formula = candidate.read_bytes()
+        upstream_formula_sha256 = digest(formula)
+        formula, adaptations = adapt_formula(formula, value)
+        candidate.write_bytes(formula)
         check_ruby(candidate)
     provenance = {
         "schema_version": 1, "repository": REPOSITORY, "tag": tag, "tag_objects": tag_objects, "release": published,
         "source_commit": value["source_commit"], "source_tree": tree_sha,
         "archive": {"url": source_url, "sha256": digest(raw), "bytes": len(raw), "tar_bytes": expanded_size, "files": len(expected)},
         "upstream_files": {name: {"git_blob": expected[name]["sha"], "sha256": digest(data)} for name, data in sources.items()},
+        "upstream_formula_sha256": upstream_formula_sha256, "formula_adaptations": adaptations,
         "formula_sha256": digest(formula), "release_input": value, "metadata_evidence": evidence,
         "generator_sha256": digest(Path(__file__).read_bytes()), "python": sys.version.split()[0],
         "ruby_syntax_checked": True, "prepared_at": dt.datetime.now(dt.timezone.utc).isoformat(),

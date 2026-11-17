@@ -61,11 +61,19 @@ run `nb1 service uninstall`, then `brew uninstall nb1`.
 
 ## Release provenance
 
-`Formula/nb1.rb` is byte-for-byte output of the renderer/template in the verified
-published nb1 source. [`releases/nb1-0.1.0.json`](releases/nb1-0.1.0.json) contains
-its explicit input; the adjacent provenance records the tag object, exact source
-commit/tree, archive hash and renderer/template hashes. No branch, Actions artifact
-or synthetic fixture is an installation source.
+`Formula/nb1.rb` starts with the renderer/template in the verified published nb1
+source. For this exact v0.1.0 source and original output hash, four reviewed
+packaging corrections disable automatic parent-Git detection and satisfy three
+strict Homebrew style rules. Go must not report Homebrew's enclosing Git commit as
+nb1's source. The explicit nb1 commit remains in human `nb1 version` output; the
+JSON VCS revision is unknown for this source-archive build. These corrections do
+not change the upstream tag, application code, dependencies or lighting behavior,
+and do not apply to future releases.
+
+[`releases/nb1-0.1.0.json`](releases/nb1-0.1.0.json) contains the explicit input.
+The adjacent provenance records the tag object, exact source commit/tree, archive
+and renderer/template hashes, original/output Formula hashes and each adaptation
+reason. No branch, Actions artifact or synthetic fixture is an installation source.
 
 The preparation tool checks the public Release, tag, source archive and every
 archived Git blob before calling that release's renderer:

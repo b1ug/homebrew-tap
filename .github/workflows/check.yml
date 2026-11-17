@@ -84,7 +84,15 @@ jobs:
           dependencies = {v["path"]: v["version"] for v in version["build"]["dependencies"]}
           assert dependencies["github.com/b1ug/blink1-go"] == "v0.0.2"
           assert dependencies["github.com/b1ug/gid"] == "v0.0.3"
-          assert dependencies["github.com/b1ug/colorkit"] == "v0.1.0"
+          go = pathlib.Path(subprocess.check_output(["brew", "--prefix", "go"], text=True).strip()) / "bin/go"
+          build_info = subprocess.check_output([go, "version", "-m", binary], text=True)
+          modules = {}
+          for line in build_info.splitlines():
+              fields = line.split()
+              if len(fields) >= 3 and fields[0] == "dep":
+                  modules[fields[1]] = fields[2]
+          assert modules["github.com/b1ug/colorkit"] == "v0.1.0"
+          (output / "installed-build-info.txt").write_text(build_info)
           (output / "installed-version.json").write_text(json.dumps(version, indent=2) + "\n")
           archive = pathlib.Path(subprocess.check_output(["brew", "--cache", "b1ug/tap/nb1"], text=True).strip())
           assert hashlib.sha256(archive.read_bytes()).hexdigest() == release["source_sha256"]

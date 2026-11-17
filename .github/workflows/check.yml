@@ -1,4 +1,4 @@
-name: Offline release preparation checks
+name: Release preparation and native installation
 
 on:
   push:
@@ -31,3 +31,77 @@ jobs:
           ruby --version
       - name: Verify offline producer behavior
         run: python3 -B -m unittest discover -s tests -v
+
+  native-install:
+    name: Homebrew install / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      HOMEBREW_NO_ANALYTICS: "1"
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+      HOMEBREW_NO_ENV_HINTS: "1"
+      GOWORK: "off"
+      GOTOOLCHAIN: local
+    steps:
+      - name: Set up native Homebrew and this exact tap source
+        id: homebrew
+        uses: Homebrew/actions/setup-homebrew@ceec4e8419bb3c97ce96e9dda7738499ed5f869d
+        with:
+          token: ${{ github.token }}
+          stable: false
+      - name: Build the published source and test the actual installed Formula
+        run: |
+          brew --version
+          brew install --build-from-source b1ug/tap/nb1
+          brew test b1ug/tap/nb1
+          brew linkage --test b1ug/tap/nb1
+      - name: Verify installed version, source, HTTP API and embedded assets
+        env:
+          NB1_TAP_SOURCE: ${{ steps.homebrew.outputs.repository-path }}
+          NB1_TAP_EVIDENCE: ${{ runner.temp }}/nb1-tap-install
+        run: |
+          python3 - <<'PYCODE'
+          import hashlib, json, os, pathlib, subprocess, tarfile
+          root = pathlib.Path(os.environ["NB1_TAP_SOURCE"])
+          output = pathlib.Path(os.environ["NB1_TAP_EVIDENCE"])
+          output.mkdir(mode=0o700, exist_ok=False)
+          release = json.loads((root / "releases/nb1-0.1.0.json").read_text())
+          prefix = pathlib.Path(subprocess.check_output(["brew", "--prefix", "b1ug/tap/nb1"], text=True).strip())
+          binary = prefix / "bin/nb1"
+          version = json.loads(subprocess.check_output([binary, "version", "--json"], text=True))
+          human = subprocess.check_output([binary, "version"], text=True)
+          assert version["version"] == "v" + release["version"]
+          assert release["source_commit"] in human
+          assert version["build"]["cgo_enabled"] is True
+          dependencies = {v["path"]: v["version"] for v in version["build"]["dependencies"]}
+          assert dependencies["github.com/b1ug/blink1-go"] == "v0.0.2"
+          assert dependencies["github.com/b1ug/gid"] == "v0.0.3"
+          assert dependencies["github.com/b1ug/colorkit"] == "v0.1.0"
+          (output / "installed-version.json").write_text(json.dumps(version, indent=2) + "\n")
+          archive = pathlib.Path(subprocess.check_output(["brew", "--cache", "b1ug/tap/nb1"], text=True).strip())
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == release["source_sha256"]
+          member_name = "nb1-" + release["version"] + "/ci/daemon-process-smoke.py"
+          with tarfile.open(archive, "r:gz") as source:
+              member = source.getmember(member_name)
+              assert member.isfile() and 0 < member.size < 65536
+              helper = output / "daemon-process-smoke.py"
+              helper.write_bytes(source.extractfile(member).read())
+          subprocess.run(["python3", "-B", str(helper), "--binary", str(binary),
+                          "--output", str(output / "offline-daemon"), "--require-no-devices"], check=True)
+          PYCODE
+      - name: Preserve native installation evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: nb1-tap-install-${{ matrix.os }}
+          path: ${{ runner.temp }}/nb1-tap-install
+          if-no-files-found: warn
+          retention-days: 14

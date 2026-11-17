@@ -217,6 +217,21 @@ class PreparationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(self.out.exists())
 
+    def test_committed_production_formula_has_matching_verified_release_record(self):
+        value = json.loads((ROOT / "releases/nb1-0.1.0.json").read_text())
+        provenance = json.loads((ROOT / "releases/nb1-0.1.0.provenance.json").read_text())
+        formula = (ROOT / "Formula/nb1.rb").read_bytes()
+        self.assertIs(value["fixture_only"], False)
+        self.assertEqual(provenance["release_input"], value)
+        self.assertEqual(provenance["formula_sha256"], producer.digest(formula))
+        self.assertEqual(provenance["source_commit"], value["source_commit"])
+        self.assertEqual(provenance["tag"], "v" + value["version"])
+        self.assertIs(provenance["release"]["prerelease"], False)
+        self.assertIn(value["source_sha256"].encode(), formula)
+        self.assertIn(value["source_url"].encode(), formula)
+        self.assertIn(value["source_commit"].encode(), formula)
+        producer.check_ruby(ROOT / "Formula/nb1.rb")
+
     @unittest.skipUnless(os.environ.get("NB1_TAP_TEST_UPSTREAM"), "optional real renderer integration")
     def test_actual_nb1_renderer_and_template_integration(self):
         source = Path(os.environ["NB1_TAP_TEST_UPSTREAM"])

@@ -1,0 +1,73 @@
+{
+  "archive": {
+    "bytes": 5716483,
+    "files": 684,
+    "sha256": "6adc9912b87a8aa1fa8a8a956d0b81318ac24428bd2aa33073eb730ba17b9b13",
+    "tar_bytes": 10639360,
+    "url": "https://github.com/b1ug/nb1/archive/refs/tags/v0.1.0.tar.gz"
+  },
+  "formula_adaptations": [
+    {
+      "id": "infer_version",
+      "reason": "Homebrew infers the same version from the immutable source URL."
+    },
+    {
+      "id": "literal_macos_symbol",
+      "reason": "Use the equivalent literal symbol required by strict style."
+    },
+    {
+      "id": "dependency_order",
+      "reason": "Put the same build dependency before the platform block for strict style."
+    },
+    {
+      "id": "disable_parent_vcs",
+      "reason": "Prevent Go from misidentifying Homebrew's enclosing Git repository as nb1 source; retain the explicit nb1 commit linker value."
+    }
+  ],
+  "formula_sha256": "94d4aac68019709ebe9cd9b7be04376864b5e409db4192f3e7833f6907acf6d3",
+  "release": {
+    "id": 448251748,
+    "immutable": false,
+    "prerelease": false,
+    "published_at": "2026-11-17T06:43:43Z",
+    "tag_name": "v0.1.0"
+  },
+  "release_input": {
+    "components": "nb1-only",
+    "fixture_only": false,
+    "min_macos": "sequoia",
+    "schema_version": 1,
+    "source_commit": "535621a689e5a9e35c5e897aadcd4b023d2f157b",
+    "source_sha256": "6adc9912b87a8aa1fa8a8a956d0b81318ac24428bd2aa33073eb730ba17b9b13",
+    "source_url": "https://github.com/b1ug/nb1/archive/refs/tags/v0.1.0.tar.gz",
+    "version": "0.1.0"
+  },
+  "repository": "b1ug/nb1",
+  "ruby_syntax_checked": true,
+  "schema_version": 1,
+  "scope": "Verified published source release; exact upstream renderer output followed by four reviewed packaging corrections only for v0.1.0/source 535621a. Installation and service qualification are separate.",
+  "source_commit": "535621a689e5a9e35c5e897aadcd4b023d2f157b",
+  "source_tree": "6752fda09c64414939625d4d65d8d0ed403ee833",
+  "tag": "v0.1.0",
+  "tag_objects": [
+    {
+      "sha": "a395f0633aad963cc68292ce9b6231fcfacc0412",
+      "type": "tag"
+    },
+    {
+      "sha": "535621a689e5a9e35c5e897aadcd4b023d2f157b",
+      "type": "commit"
+    }
+  ],
+  "upstream_files": {
+    "packaging/homebrew/nb1.rb.in": {
+      "git_blob": "74765e512e2d2f249eee3c08ad1c3f9aa545a5c3",
+      "sha256": "8aff3b323a9d1f982d0b274a80164b94623dae523c29684eaeeacb628bcac5cb"
+    },
+    "packaging/homebrew/render_formula.py": {
+      "git_blob": "91cd848e78c342e743f028c80ce550285f6680e9",
+      "sha256": "47cca3f5f3789e87f2947bce252446458fbeee6eedfd4842f3110a5c4a00921f"
+    }
+  },
+  "upstream_formula_sha256": "fa9e7a34f85f3a734f8bbc953fc878aab6d922e7da0479732ab61fd9df91bb1c"
+}

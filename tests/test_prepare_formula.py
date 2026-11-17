@@ -217,6 +217,37 @@ class PreparationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(self.out.exists())
 
+    def test_v010_adapter_rejects_unrecognized_output_and_leaves_other_releases_untouched(self):
+        current = json.loads((ROOT / "releases/nb1-0.1.0.json").read_text())
+        with self.assertRaisesRegex(ValueError, "exact verified upstream"):
+            producer.adapt_formula(b"unknown Formula", current)
+        for change in ({"version": "0.1.1"}, {"source_commit": COMMIT}):
+            with self.subTest(change=change):
+                value = {**current, **change}
+                self.assertEqual(producer.adapt_formula(b"future renderer output", value),
+                                 (b"future renderer output", []))
+
+    def test_committed_production_formula_has_matching_verified_release_record(self):
+        value = json.loads((ROOT / "releases/nb1-0.1.0.json").read_text())
+        provenance = json.loads((ROOT / "releases/nb1-0.1.0.provenance.json").read_text())
+        formula = (ROOT / "Formula/nb1.rb").read_bytes()
+        self.assertIs(value["fixture_only"], False)
+        self.assertEqual(provenance["release_input"], value)
+        self.assertEqual(provenance["formula_sha256"], producer.digest(formula))
+        self.assertEqual(provenance["source_commit"], value["source_commit"])
+        self.assertEqual(provenance["tag"], "v" + value["version"])
+        self.assertIs(provenance["release"]["prerelease"], False)
+        self.assertIn(value["source_sha256"].encode(), formula)
+        self.assertIn(value["source_url"].encode(), formula)
+        self.assertIn(value["source_commit"].encode(), formula)
+        self.assertEqual(provenance["upstream_formula_sha256"], "fa9e7a34f85f3a734f8bbc953fc878aab6d922e7da0479732ab61fd9df91bb1c")
+        self.assertEqual({item["id"] for item in provenance["formula_adaptations"]},
+                         {"infer_version", "literal_macos_symbol", "dependency_order", "disable_parent_vcs"})
+        self.assertIn(b'"-buildvcs=false"', formula)
+        self.assertNotIn(b'  version "0.1.0"', formula)
+        self.assertNotIn(b'"sequoia".to_sym', formula)
+        producer.check_ruby(ROOT / "Formula/nb1.rb")
+
     @unittest.skipUnless(os.environ.get("NB1_TAP_TEST_UPSTREAM"), "optional real renderer integration")
     def test_actual_nb1_renderer_and_template_integration(self):
         source = Path(os.environ["NB1_TAP_TEST_UPSTREAM"])
@@ -225,6 +256,14 @@ class PreparationTests(unittest.TestCase):
         text = (self.out / "Formula/nb1.rb").read_text()
         self.assertIn('Gem::Version.new("1.27.4")', text)
         self.assertIn('class Nb1 < Formula', text)
+        # The reviewed current release must still originate in its real renderer.
+        spec = importlib.util.spec_from_file_location("upstream_renderer", source / producer.RENDERER)
+        renderer = importlib.util.module_from_spec(spec); spec.loader.exec_module(renderer)
+        current = json.loads((ROOT / "releases/nb1-0.1.0.json").read_text())
+        raw = renderer.render(current).encode()
+        adapted, changes = producer.adapt_formula(raw, current)
+        self.assertEqual(adapted, (ROOT / "Formula/nb1.rb").read_bytes())
+        self.assertEqual(len(changes), 4)
 
 
 class NetworkBoundaryTests(unittest.TestCase):

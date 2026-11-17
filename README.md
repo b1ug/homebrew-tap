@@ -1,33 +1,82 @@
-# nb1 Homebrew tap preparation
+# nb1 Homebrew tap
 
 [简体中文](README.zh-CN.md)
 
-This is a **private preparation repository, not an installable tap**. Its
-remote is `b1ug/homebrew-tap`, kept private for review. No `Formula/nb1.rb` is present. No qualifying new nb1 Release has
-been selected, and historical `v0.0.1` does not provide the current CLI/API.
+Install **nb1**, the local control tool for **blink(1)**:
 
-The product is **nb1**; the hardware is **blink(1)**.
+```sh
+brew tap b1ug/tap
+brew install b1ug/tap/nb1
+nb1 version --json
+nb1 list
+nb1 server --devices YOUR_DEVICE_SERIAL
+```
 
-## Prepare a real release for local review
+Open <http://127.0.0.1:8931/demo/> for the embedded English/Chinese debugger.
+The workbench, 3D preview and API are part of the same executable; no Node server
+or browser USB permission is required. Preview is optional; Play controls the light.
 
-Requirements: Python 3.11+ and Ruby already installed. This tool installs neither
-Homebrew nor a service. It uses unauthenticated public HTTPS GETs and does not read
-GitHub credentials, netrc, proxy configuration or nb1/user service configuration.
+## Supported installation
 
-Obtain the approved real release input matching the released nb1 source's
-`packaging/homebrew/release-input.required.json`. Fill it with verified values;
-keep its existing schema and set `fixture_only` to `false`.
+The Formula builds the published [nb1 v0.1.0 source](https://github.com/b1ug/nb1/releases/tag/v0.1.0)
+with Homebrew's Go dependency (Go 1.27.4 or newer) and a native C compiler.
+It requires macOS 15 or newer on Mac; Linux follows Homebrew's supported Linux
+build environment. It is a source installation, not a prebuilt bottle. The
+prebuilt GitHub CLI's glibc 2.38 requirement does not describe every local source
+build; inspect the installed binary and your platform's Homebrew requirements.
 
-| Input | Meaning |
-| --- | --- |
-| `version` | Released SemVer without `v`, newer than `0.0.1`; the upstream renderer validates this. |
-| `source_url` | Exact `https://github.com/b1ug/nb1/archive/refs/tags/v<version>.tar.gz`. |
-| `source_sha256` | Actual SHA-256 of that archive. |
-| `source_commit` | Exact lowercase commit SHA reached by that tag. |
-| `min_macos`, `components` | Explicit values supported by that release's renderer. |
-| `schema_version`, `fixture_only` | Existing explicit renderer schema fields. |
+The matching optional `nb1-mcp` and Agent Skill are separate
+[release downloads](https://github.com/b1ug/nb1/releases/tag/v0.1.0), not bundled by this Formula.
 
-Choose an **existing parent and a new output directory** explicitly:
+Installation does not start a server or register a service. Keep the foreground
+`nb1 server` while trying the debugger. For an explicitly managed user service:
+
+```sh
+nb1 service install --devices YOUR_DEVICE_SERIAL
+nb1 service start
+nb1 service status
+```
+
+`service install` configures login loading; it does not immediately start the
+service without `--start`. Management uses macOS LaunchAgent or Linux systemd
+user services. A Linux container without a user systemd manager cannot run that
+managed-service path; foreground `nb1 server` still works. This Formula does not
+provide `brew services` integration.
+
+## Upgrade and remove
+
+```sh
+brew update
+brew upgrade b1ug/tap/nb1
+nb1 service status
+# Restart explicitly when ready to switch an existing managed process:
+nb1 service stop
+nb1 service start
+```
+
+The Formula binds service registration to the stable Homebrew `opt` path.
+Package upgrades do not restart a running daemon, rewrite user configuration,
+or replace saved colors/Patterns. Before uninstalling an active managed service,
+run `nb1 service uninstall`, then `brew uninstall nb1`.
+
+## Release provenance
+
+`Formula/nb1.rb` starts with the renderer/template in the verified published nb1
+source. For this exact v0.1.0 source and original output hash, four reviewed
+packaging corrections disable automatic parent-Git detection and satisfy three
+strict Homebrew style rules. Go must not report Homebrew's enclosing Git commit as
+nb1's source. The explicit nb1 commit remains in human `nb1 version` output; the
+JSON VCS revision is unknown for this source-archive build. These corrections do
+not change the upstream tag, application code, dependencies or lighting behavior,
+and do not apply to future releases.
+
+[`releases/nb1-0.1.0.json`](releases/nb1-0.1.0.json) contains the explicit input.
+The adjacent provenance records the tag object, exact source commit/tree, archive
+and renderer/template hashes, original/output Formula hashes and each adaptation
+reason. No branch, Actions artifact or synthetic fixture is an installation source.
+
+The preparation tool checks the public Release, tag, source archive and every
+archived Git blob before calling that release's renderer:
 
 ```sh
 python3 scripts/prepare_formula.py \
@@ -35,65 +84,19 @@ python3 scripts/prepare_formula.py \
   --output-dir /absolute/path/new-nb1-formula-review
 ```
 
-The producer verifies the public repository, a published Release for the exact
-tag, lightweight or annotated tag resolution, commit/tree identity, official
-archive URL and checksum, and every archived file's Git blob/mode. It rechecks the
-tag and Release before rendering; a moved tag fails. `target_commitish` is not
-used as proof of a commit. Published prerelease status is recorded for review.
-GitHub distinguishes a Release from a bare tag, and refs can move.
-([Release API](https://docs.github.com/en/rest/releases/releases),
-[Git refs](https://docs.github.com/en/rest/git/refs))
+Python 3.11+ and Ruby are required for preparation only. Output must be a new
+local directory. The tool does not install, publish or start anything.
 
-Only then does it copy the verified archive's original `render_formula.py` and
-`nb1.rb.in` to a temporary directory and call that renderer. There is no vendored
-Formula, duplicated rendering rule, fixture/skip-verification CLI option, or
-fallback to a branch/Actions artifact. The verified release's Python renderer
-executes under the current user with isolated Python imports and a minimal child
-environment; this is not an operating-system sandbox or a review of upstream code.
-
-After upstream validation and `ruby --disable-gems -c` succeed, the tool creates:
-
-```text
-new-nb1-formula-review/
-  Formula/nb1.rb
-  provenance.json
-```
-
-The new output directory is reserved exclusively; an existing path is refused.
-Verification failures create no output. A failure while publishing the local
-files removes only that newly created directory. Inputs are never overwritten.
-Provenance records source/tree/archive/renderer/template/Formula hashes, public
-metadata response hashes, release status and verification scope.
-
-This prepares local files only. Review the provenance and platform acceptance
-evidence before manually bringing a real Formula into the private tap. Nothing
-commits, pushes, publishes a Release, installs Homebrew, or starts a service.
-Generated syntax checks do not constitute `brew audit`, installation, upgrade,
-user-service, USB or optical acceptance.
-
-## Limits and tests
-
-GETs use a 180-second budget checked between reads, a 20-second socket timeout and
-no retries. JSON nesting is limited to 64 levels. Input is bounded to 64 KiB;
-metadata to 8 MiB per response; archive
-to 32 MiB compressed / 128 MiB expanded; individual files to 32 MiB; entries to
-10,000. Partial Git trees, links, submodules and export-filtered/incomplete source
-archives are refused. These limits are deliberate checks for the current nb1
-source layout; they are not silently weakened when a future layout changes.
-([Git tree metadata](https://docs.github.com/en/rest/git/trees))
+## Checks
 
 ```sh
-python3 -m unittest discover -s tests -v
+python3 -B -m unittest discover -s tests -v
 ```
 
-Tests use synthetic release metadata, mock HTTP, temporary archives and local
-Ruby syntax checks. They never fetch a real release or leave a Formula here.
-To exercise an existing real nb1 renderer/template with the same mocked metadata:
+Unit tests use mock HTTP and synthetic archives, not USB or user configuration.
+Native macOS/Linux CI builds the real released source, runs the Formula's
+USB-free tests, verifies installed version/source and exercises an offline daemon.
+A successful software check is not physical USB, MK3, login or reboot acceptance.
 
-```sh
-NB1_TAP_TEST_UPSTREAM=/absolute/path/to/nb1 \
-  python3 -m unittest discover -s tests -v
-```
-
-That optional test is still an offline software fixture, not a published release
-or an installable channel. CI runs only offline verification tests.
+[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.0/docs/install.md)
+· [Homebrew support requirements](https://docs.brew.sh/Installation)

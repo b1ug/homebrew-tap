@@ -1,27 +1,55 @@
-# nb1 Homebrew tap 准备仓库
+# nb1 Homebrew tap
 
 [English](README.md)
 
-这是**私有准备仓库，目前不可安装**。远程仓库为 `b1ug/homebrew-tap`，保持私有供审核。当前没有 `Formula/nb1.rb`，也没有选定符合条件的新 nb1 Release；历史 `v0.0.1` 不提供当前 CLI/API。
+通过 Homebrew 安装 **nb1**，在本机控制 **blink(1)**：
 
-产品名是 **nb1**，硬件名是 **blink(1)**。
+```sh
+brew tap b1ug/tap
+brew install b1ug/tap/nb1
+nb1 version --json
+nb1 list
+nb1 server --devices YOUR_DEVICE_SERIAL
+```
 
-## 为真实 Release 生成本地审核文件
+打开 <http://127.0.0.1:8931/demo/> 即可使用内嵌英中调试器。页面、3D 预览和 API 都在同一个程序内，无需 Node 服务或浏览器 USB 授权。Preview 可选，Play 才控制实体灯。
 
-需要已安装 Python 3.11+ 和 Ruby；工具不会安装 Homebrew 或服务。只通过未认证的公共 HTTPS GET 获取资料，不读取 GitHub 凭据、netrc、代理配置或用户的 nb1/系统服务配置。
+## 安装范围
 
-从实际已发布源码取得对应的 `packaging/homebrew/release-input.required.json`，填入真实审核数据，保持原 schema，`fixture_only` 必须为 `false`：
+Formula 从已发布的 [nb1 v0.1.0 源码](https://github.com/b1ug/nb1/releases/tag/v0.1.0)编译，使用 Homebrew 提供的 Go（至少 1.27.4）和本机 C 编译器。Mac 要求 macOS 15 或更新；Linux 以 Homebrew 支持的构建环境为准。这是源码安装，尚未提供预编译 bottle。GitHub 预编译 CLI 的 glibc 2.38 门槛不能直接套用于每个本机源码构建，具体依赖以安装后的二进制和 Homebrew 系统要求为准。
 
-| 字段 | 内容 |
-| --- | --- |
-| `version` | 不带 `v`、高于 `0.0.1` 的已发布 SemVer；由上游渲染器校验。 |
-| `source_url` | 精确的 `https://github.com/b1ug/nb1/archive/refs/tags/v<version>.tar.gz`。 |
-| `source_sha256` | 该真实归档的 SHA-256。 |
-| `source_commit` | 该 tag 最终指向的精确小写 commit SHA。 |
-| `min_macos`、`components` | 该版渲染器支持的显式值。 |
-| `schema_version`、`fixture_only` | 渲染器原有的显式 schema 字段。 |
+可选 `nb1-mcp` 和 Agent Skill 仍单独从[同版 Release](https://github.com/b1ug/nb1/releases/tag/v0.1.0)下载，当前 Formula 不捆绑它们。
 
-显式指定一个**父目录已存在、目标尚不存在**的本地目录：
+安装不会自动启动 server 或注册服务。初次体验可直接保留前台 `nb1 server`。需要后台用户服务时显式执行：
+
+```sh
+nb1 service install --devices YOUR_DEVICE_SERIAL
+nb1 service start
+nb1 service status
+```
+
+`service install` 配置登录加载；未指定 `--start` 时，不立即启动。Mac 使用 LaunchAgent，Linux 使用 systemd 用户服务。没有用户 systemd manager 的 Linux 容器无法托管该服务，但仍可前台运行 server。当前没有 `brew services` 集成。
+
+## 升级与卸载
+
+```sh
+brew update
+brew upgrade b1ug/tap/nb1
+nb1 service status
+# 准备好切换已经运行的托管进程时，显式重启：
+nb1 service stop
+nb1 service start
+```
+
+Formula 把服务注册绑定到稳定的 Homebrew `opt` 路径。升级安装包不会自动重启 daemon、改写用户配置或替换已保存颜色／Pattern。卸载正在托管的服务前，先运行 `nb1 service uninstall`，再运行 `brew uninstall nb1`。
+
+## 发布来源
+
+`Formula/nb1.rb` 先由已核验发布源码中的 renderer/template 生成。仅针对精确 v0.1.0 源码与原始输出哈希，再应用四项已审包装修正：关闭父目录 Git 自动识别，并满足三条 Homebrew 严格样式规则。这样 Go 不会把外层 Homebrew 的 commit 误报为 nb1 来源。人类 `nb1 version` 输出仍保留显式 nb1 commit，JSON 的 VCS revision 在源码归档构建中为未知。修正不改上游 tag、程序代码、依赖或灯效，也不会套用于未来版本。
+
+[`releases/nb1-0.1.0.json`](releases/nb1-0.1.0.json)保存显式输入。旁边的来源记录保存 tag 对象、精确 source commit/tree、归档和 renderer/template 哈希、修正前后 Formula 哈希及各项理由。安装源不会使用 branch、Actions 产物或合成 fixture。
+
+准备工具先校验公开 Release、tag、源码归档中每个 Git blob，再运行对应版本的 renderer：
 
 ```sh
 python3 scripts/prepare_formula.py \
@@ -29,35 +57,14 @@ python3 scripts/prepare_formula.py \
   --output-dir /absolute/path/new-nb1-formula-review
 ```
 
-准备器核对公开仓库、与精确 tag 对应的 published Release、轻量/附注 tag 的最终 commit、源码树、官方归档 URL、SHA-256，以及归档中每个文件的 Git blob 和执行位；渲染前再次核对 tag/Release，发生移动就失败。`target_commitish` 不能作为 commit 身份依据。发布为 prerelease 时会将状态保留在来源记录中，供审核决定。GitHub 的 Release 与裸 tag 不相同，ref 本身也可能被移动。[Release API](https://docs.github.com/en/rest/releases/releases) · [Git refs](https://docs.github.com/en/rest/git/refs)
+仅发布准备需要 Python 3.11+ 和 Ruby，输出必须是新的本地目录。工具不会安装、发布或启动服务。
 
-通过后才把已核验归档中的原始 `render_formula.py` 和 `nb1.rb.in` 放入临时目录，调用该版渲染器。不复制 Formula 规则，不提供 fixture/跳过校验开关，不回退到 branch、latest 或 Actions 包。上游已核验 Python 渲染器以当前用户运行，使用隔离的 Python 导入和最小子进程环境；这不是操作系统沙盒，也不代替源码审核。
-
-上游输入校验和 `ruby --disable-gems -c` 均通过后，才生成：
-
-```text
-new-nb1-formula-review/
-  Formula/nb1.rb
-  provenance.json
-```
-
-目标目录以独占方式创建；拒绝覆盖任何已有路径。校验失败不产生输出，本地文件发布阶段失败则仅清理刚创建的目标目录，不覆盖输入。来源记录包含 source/tree/archive/renderer/template/Formula 哈希、公开元数据响应哈希、Release 状态和检查范围。
-
-工具只准备本地文件。把真实 Formula 纳入私有 tap 前，应审核来源与各平台验收结果。它不会 commit、push、创建 Release、安装 Homebrew 或启动服务。Ruby 语法通过不代表 `brew audit`、安装升级、用户服务、USB 或光学验收通过。
-
-## 边界与测试
-
-网络预算 180 秒（在读取之间检查）、socket timeout 20 秒，不重试。JSON 嵌套最多 64 层；输入上限 64 KiB；每份元数据 8 MiB；归档压缩后 32 MiB、展开后 128 MiB；单文件 32 MiB；最多 10,000 项。拒绝截断的 Git tree、链接、submodule 和导出时过滤/缺失文件的归档。这些检查针对当前 nb1 源码布局，未来不兼容时应明确修改并验证，不会静默放宽。[Git tree 文档](https://docs.github.com/en/rest/git/trees)
+## 验证
 
 ```sh
-python3 -m unittest discover -s tests -v
+python3 -B -m unittest discover -s tests -v
 ```
 
-默认测试只使用合成 Release 元数据、mock HTTP、临时归档和 Ruby 语法检查，不获取真实 Release，不在此仓库留下 Formula。可额外对已有 nb1 工作区中的真实渲染器/模板进行离线集成：
+单元测试只用 mock HTTP 和合成归档，不访问 USB 或用户配置。Mac／Linux 原生 CI 编译真实发布源码，执行 Formula 无 USB 测试，检查安装版本与来源，并验证离线 daemon。软件检查通过不等于实体 USB、MK3、登录或重启验收通过。
 
-```sh
-NB1_TAP_TEST_UPSTREAM=/absolute/path/to/nb1 \
-  python3 -m unittest discover -s tests -v
-```
-
-该集成依然使用 mock 元数据，是软件测试，不是已发布版本或可安装通道。CI 只运行离线检查。
+[完整安装说明](https://github.com/b1ug/nb1/blob/v0.1.0/docs/install.zh-CN.md) · [Homebrew 系统要求](https://docs.brew.sh/Installation)

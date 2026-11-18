@@ -228,8 +228,8 @@ class PreparationTests(unittest.TestCase):
                                  (b"future renderer output", []))
 
     def test_committed_production_formula_has_matching_verified_release_record(self):
-        value = json.loads((ROOT / "releases/nb1-0.1.0.json").read_text())
-        provenance = json.loads((ROOT / "releases/nb1-0.1.0.provenance.json").read_text())
+        value = json.loads((ROOT / "releases/nb1-0.1.1.json").read_text())
+        provenance = json.loads((ROOT / "releases/nb1-0.1.1.provenance.json").read_text())
         formula = (ROOT / "Formula/nb1.rb").read_bytes()
         self.assertIs(value["fixture_only"], False)
         self.assertEqual(provenance["release_input"], value)
@@ -240,11 +240,11 @@ class PreparationTests(unittest.TestCase):
         self.assertIn(value["source_sha256"].encode(), formula)
         self.assertIn(value["source_url"].encode(), formula)
         self.assertIn(value["source_commit"].encode(), formula)
-        self.assertEqual(provenance["upstream_formula_sha256"], "fa9e7a34f85f3a734f8bbc953fc878aab6d922e7da0479732ab61fd9df91bb1c")
-        self.assertEqual({item["id"] for item in provenance["formula_adaptations"]},
-                         {"infer_version", "literal_macos_symbol", "dependency_order", "disable_parent_vcs"})
+        self.assertEqual(value["version"], "0.1.1")
+        self.assertEqual(provenance["upstream_formula_sha256"], provenance["formula_sha256"])
+        self.assertEqual(provenance["formula_adaptations"], [])
         self.assertIn(b'"-buildvcs=false"', formula)
-        self.assertNotIn(b'  version "0.1.0"', formula)
+        self.assertNotIn(b'  version "', formula)
         self.assertNotIn(b'"sequoia".to_sym', formula)
         producer.check_ruby(ROOT / "Formula/nb1.rb")
 
@@ -259,11 +259,12 @@ class PreparationTests(unittest.TestCase):
         # The reviewed current release must still originate in its real renderer.
         spec = importlib.util.spec_from_file_location("upstream_renderer", source / producer.RENDERER)
         renderer = importlib.util.module_from_spec(spec); spec.loader.exec_module(renderer)
-        current = json.loads((ROOT / "releases/nb1-0.1.0.json").read_text())
+        current = json.loads((ROOT / "releases/nb1-0.1.1.json").read_text())
         raw = renderer.render(current).encode()
         adapted, changes = producer.adapt_formula(raw, current)
         self.assertEqual(adapted, (ROOT / "Formula/nb1.rb").read_bytes())
-        self.assertEqual(len(changes), 4)
+        self.assertEqual(raw, adapted)
+        self.assertEqual(changes, [])
 
 
 class NetworkBoundaryTests(unittest.TestCase):

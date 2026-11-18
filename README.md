@@ -18,15 +18,20 @@ or browser USB permission is required. Preview is optional; Play controls the li
 
 ## Supported installation
 
-The Formula builds the published [nb1 v0.1.0 source](https://github.com/b1ug/nb1/releases/tag/v0.1.0)
+The Formula builds the published [nb1 v0.1.1 source](https://github.com/b1ug/nb1/releases/tag/v0.1.1)
 with Homebrew's Go dependency (Go 1.27.4 or newer) and a native C compiler.
 It requires macOS 15 or newer on Mac; Linux follows Homebrew's supported Linux
 build environment. It is a source installation, not a prebuilt bottle. The
 prebuilt GitHub CLI's glibc 2.38 requirement does not describe every local source
 build; inspect the installed binary and your platform's Homebrew requirements.
 
+The CLI help, errors and diagnostic messages remain English across locale
+settings; the embedded workbench has its own English/Chinese switch. `NO_COLOR=1`
+disables terminal styling. The application source minimum is Go 1.25.8; the
+Formula deliberately uses the newer build toolchain stated above.
+
 The matching optional `nb1-mcp` and Agent Skill are separate
-[release downloads](https://github.com/b1ug/nb1/releases/tag/v0.1.0), not bundled by this Formula.
+[release downloads](https://github.com/b1ug/nb1/releases/tag/v0.1.1), not bundled by this Formula.
 
 Installation does not start a server or register a service. Keep the foreground
 `nb1 server` while trying the debugger. For an explicitly managed user service:
@@ -57,23 +62,25 @@ nb1 service start
 The Formula binds service registration to the stable Homebrew `opt` path.
 Package upgrades do not restart a running daemon, rewrite user configuration,
 or replace saved colors/Patterns. Before uninstalling an active managed service,
-run `nb1 service uninstall`, then `brew uninstall nb1`.
+run `nb1 service uninstall --stop`, then `brew uninstall nb1`.
 
 ## Release provenance
 
-`Formula/nb1.rb` starts with the renderer/template in the verified published nb1
-source. For this exact v0.1.0 source and original output hash, four reviewed
-packaging corrections disable automatic parent-Git detection and satisfy three
-strict Homebrew style rules. Go must not report Homebrew's enclosing Git commit as
-nb1's source. The explicit nb1 commit remains in human `nb1 version` output; the
-JSON VCS revision is unknown for this source-archive build. These corrections do
-not change the upstream tag, application code, dependencies or lighting behavior,
-and do not apply to future releases.
+`Formula/nb1.rb` is the unchanged output of the renderer/template in the
+verified published v0.1.1 source. Its source-archive build disables unrelated
+parent-repository VCS stamping. Human `nb1 version` output still includes the
+explicit nb1 source commit; the JSON VCS revision remains unknown for this build.
 
-[`releases/nb1-0.1.0.json`](releases/nb1-0.1.0.json) contains the explicit input.
-The adjacent provenance records the tag object, exact source commit/tree, archive
-and renderer/template hashes, original/output Formula hashes and each adaptation
-reason. No branch, Actions artifact or synthetic fixture is an installation source.
+[`releases/nb1-0.1.1.json`](releases/nb1-0.1.1.json) contains the explicit input.
+The adjacent provenance binds the public Release, tag object, exact source
+commit/tree, source archive and renderer/template hashes to the Formula. The raw
+renderer output and committed Formula have identical hashes and no adaptations.
+No branch, Actions artifact or synthetic fixture is an installation source.
+
+The original [v0.1.0 input](releases/nb1-0.1.0.json) and its provenance retain
+the four exact-hash-bound packaging corrections required by that initial
+release. Those historical records and the narrowly scoped adapter are preserved;
+the corrections are not applied to v0.1.1.
 
 The preparation tool checks the public Release, tag, source archive and every
 archived Git blob before calling that release's renderer:
@@ -98,5 +105,5 @@ Native macOS/Linux CI builds the real released source, runs the Formula's
 USB-free tests, verifies installed version/source and exercises an offline daemon.
 A successful software check is not physical USB, MK3, login or reboot acceptance.
 
-[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.0/docs/install.md)
+[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.1/docs/install.md)
 · [Homebrew support requirements](https://docs.brew.sh/Installation)

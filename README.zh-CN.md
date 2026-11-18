@@ -16,11 +16,11 @@ nb1 server --devices YOUR_DEVICE_SERIAL
 
 ## 安装范围
 
-Formula 从已发布的 [nb1 v0.1.1 源码](https://github.com/b1ug/nb1/releases/tag/v0.1.1)编译，使用 Homebrew 提供的 Go（至少 1.27.4）和本机 C 编译器。Mac 要求 macOS 15 或更新；Linux 以 Homebrew 支持的构建环境为准。这是源码安装，尚未提供预编译 bottle。GitHub 预编译 CLI 的 glibc 2.38 门槛不能直接套用于每个本机源码构建，具体依赖以安装后的二进制和 Homebrew 系统要求为准。
+Formula 从已发布的 [nb1 v0.1.2 源码](https://github.com/b1ug/nb1/releases/tag/v0.1.2)编译，使用 Homebrew 提供的 Go（至少 1.27.4）和本机 C 编译器。Mac 要求 macOS 15 或更新；Linux 以 Homebrew 支持的构建环境为准。这是源码安装，尚未提供预编译 bottle。GitHub 预编译 CLI 的 glibc 2.38 门槛不能直接套用于每个本机源码构建，具体依赖以安装后的二进制和 Homebrew 系统要求为准。
 
 CLI 帮助、错误与诊断消息在不同语言环境下仍保持英文；内嵌调试器有独立英中切换。`NO_COLOR=1` 禁用终端样式。应用源码最低要求 Go 1.25.8，Formula 使用上方列出的较新构建工具链。
 
-可选 `nb1-mcp` 和 Agent Skill 仍单独从[同版 Release](https://github.com/b1ug/nb1/releases/tag/v0.1.1)下载，当前 Formula 不捆绑它们。
+可选 `nb1-mcp` 和 Agent Skill 仍单独从[同版 Release](https://github.com/b1ug/nb1/releases/tag/v0.1.2)下载，当前 Formula 不捆绑它们。
 
 安装不会自动启动 server 或注册服务。初次体验可直接保留前台 `nb1 server`。需要后台用户服务时显式执行：
 
@@ -47,11 +47,11 @@ Formula 把服务注册绑定到稳定的 Homebrew `opt` 路径。升级安装�
 
 ## 发布来源
 
-`Formula/nb1.rb` 直接使用已核验 v0.1.1 发布源码中的 renderer/template 原始输出，不再追加本地适配。源码归档构建禁用无关父目录的 VCS 自动识别；人类 `nb1 version` 输出仍显示显式 nb1 source commit，JSON 的 VCS revision 在这类构建中为未知。
+`Formula/nb1.rb` 直接使用已核验 v0.1.2 发布源码中的 renderer/template 原始输出，不再追加本地适配。源码归档构建禁用无关父目录的 VCS 自动识别；人类 `nb1 version` 输出仍显示显式 nb1 source commit，JSON 的 VCS revision 在这类构建中为未知。
 
-[`releases/nb1-0.1.1.json`](releases/nb1-0.1.1.json) 保存显式输入。旁边的来源记录把公开 Release、tag 对象、精确 source commit/tree、源码归档与 renderer/template 哈希绑定到 Formula；原始输出和提交后的 Formula 哈希相同，适配列表为空。安装源不使用 branch、Actions 产物或合成 fixture。
+[`releases/nb1-0.1.2.json`](releases/nb1-0.1.2.json) 保存显式输入。旁边的来源记录把公开 Release、tag 对象、精确 source commit/tree、源码归档与 renderer/template 哈希绑定到 Formula；原始输出和提交后的 Formula 哈希相同，适配列表为空。安装源不使用 branch、Actions 产物或合成 fixture。
 
-原有 [v0.1.0 输入](releases/nb1-0.1.0.json) 与来源记录保留首版所需的四项精确哈希限定包装修正。历史文件与窄范围 adapter 保持原样；这些修正不会套到 v0.1.1。
+原有 [v0.1.0 输入](releases/nb1-0.1.0.json) 与来源记录保留首版所需的四项精确哈希限定包装修正。历史文件与窄范围 adapter 保持原样；这些修正不会套到 v0.1.1 或 v0.1.2；已核验的 [v0.1.1 输入与来源记录](releases/nb1-0.1.1.json) 也完整保留。
 
 准备工具先校验公开 Release、tag、源码归档中每个 Git blob，再运行对应版本的 renderer：
 
@@ -71,4 +71,4 @@ python3 -B -m unittest discover -s tests -v
 
 单元测试只用 mock HTTP 和合成归档，不访问 USB 或用户配置。Mac／Linux 原生 CI 编译真实发布源码，执行 Formula 无 USB 测试，检查安装版本与来源，并验证离线 daemon。软件检查通过不等于实体 USB、MK3、登录或重启验收通过。
 
-[完整安装说明](https://github.com/b1ug/nb1/blob/v0.1.1/docs/install.zh-CN.md) · [Homebrew 系统要求](https://docs.brew.sh/Installation)
+[完整安装说明](https://github.com/b1ug/nb1/blob/v0.1.2/docs/install.zh-CN.md) · [Homebrew 系统要求](https://docs.brew.sh/Installation)

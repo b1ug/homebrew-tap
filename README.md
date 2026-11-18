@@ -18,7 +18,7 @@ or browser USB permission is required. Preview is optional; Play controls the li
 
 ## Supported installation
 
-The Formula builds the published [nb1 v0.1.1 source](https://github.com/b1ug/nb1/releases/tag/v0.1.1)
+The Formula builds the published [nb1 v0.1.2 source](https://github.com/b1ug/nb1/releases/tag/v0.1.2)
 with Homebrew's Go dependency (Go 1.27.4 or newer) and a native C compiler.
 It requires macOS 15 or newer on Mac; Linux follows Homebrew's supported Linux
 build environment. It is a source installation, not a prebuilt bottle. The
@@ -31,7 +31,7 @@ disables terminal styling. The application source minimum is Go 1.25.8; the
 Formula deliberately uses the newer build toolchain stated above.
 
 The matching optional `nb1-mcp` and Agent Skill are separate
-[release downloads](https://github.com/b1ug/nb1/releases/tag/v0.1.1), not bundled by this Formula.
+[release downloads](https://github.com/b1ug/nb1/releases/tag/v0.1.2), not bundled by this Formula.
 
 Installation does not start a server or register a service. Keep the foreground
 `nb1 server` while trying the debugger. For an explicitly managed user service:
@@ -67,11 +67,11 @@ run `nb1 service uninstall --stop`, then `brew uninstall nb1`.
 ## Release provenance
 
 `Formula/nb1.rb` is the unchanged output of the renderer/template in the
-verified published v0.1.1 source. Its source-archive build disables unrelated
+verified published v0.1.2 source. Its source-archive build disables unrelated
 parent-repository VCS stamping. Human `nb1 version` output still includes the
 explicit nb1 source commit; the JSON VCS revision remains unknown for this build.
 
-[`releases/nb1-0.1.1.json`](releases/nb1-0.1.1.json) contains the explicit input.
+[`releases/nb1-0.1.2.json`](releases/nb1-0.1.2.json) contains the explicit input.
 The adjacent provenance binds the public Release, tag object, exact source
 commit/tree, source archive and renderer/template hashes to the Formula. The raw
 renderer output and committed Formula have identical hashes and no adaptations.
@@ -80,7 +80,8 @@ No branch, Actions artifact or synthetic fixture is an installation source.
 The original [v0.1.0 input](releases/nb1-0.1.0.json) and its provenance retain
 the four exact-hash-bound packaging corrections required by that initial
 release. Those historical records and the narrowly scoped adapter are preserved;
-the corrections are not applied to v0.1.1.
+the corrections are not applied to v0.1.1 or v0.1.2. The verified
+[v0.1.1 input and provenance](releases/nb1-0.1.1.json) are also preserved.
 
 The preparation tool checks the public Release, tag, source archive and every
 archived Git blob before calling that release's renderer:
@@ -105,5 +106,5 @@ Native macOS/Linux CI builds the real released source, runs the Formula's
 USB-free tests, verifies installed version/source and exercises an offline daemon.
 A successful software check is not physical USB, MK3, login or reboot acceptance.
 
-[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.1/docs/install.md)
+[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.2/docs/install.md)
 · [Homebrew support requirements](https://docs.brew.sh/Installation)

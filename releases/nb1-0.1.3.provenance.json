@@ -1,0 +1,99 @@
+{
+  "archive": {
+    "bytes": 3525608,
+    "files": 710,
+    "sha256": "08a1ce843c6db0db38e839b1550f37a33a12f1ddde66b04ab6b23c138094e502",
+    "tar_bytes": 8683520,
+    "url": "https://github.com/b1ug/nb1/archive/refs/tags/v0.1.3.tar.gz"
+  },
+  "formula_adaptations": [],
+  "formula_sha256": "4609a81f3fcd7eabddaf9ab31acd826fb46f223b08ecac6ba655a201e7aad23f",
+  "generator_sha256": "c3a9941d4ad70228fae269a3f49e284b8b2eb40cdb0e2e339035d120ab537550",
+  "homebrew_installed": false,
+  "metadata_evidence": [
+    {
+      "sha256": "bb4021030edaacc70018084c8dafc69b6f026f4be568b89875c3ad38dd535f27",
+      "url": "https://api.github.com/repos/b1ug/nb1"
+    },
+    {
+      "sha256": "8a25c235e0ee079429e9c1ee15e621fe0cdcfa950686e8fc76536fdf86a10cb9",
+      "url": "https://api.github.com/repos/b1ug/nb1/releases/tags/v0.1.3"
+    },
+    {
+      "sha256": "f187a3b60c0059ddd787e9c9c8db327d9df5bec8c5d46da4e6fc12323b23dff7",
+      "url": "https://api.github.com/repos/b1ug/nb1/git/ref/tags/v0.1.3"
+    },
+    {
+      "sha256": "88ca93c0f2e9f1828606dc09d9038ca13c3369098ea8efa0acd34d1cb25b136d",
+      "url": "https://api.github.com/repos/b1ug/nb1/git/tags/7bc12c597bdb791611c20b4a694453c048a5b135"
+    },
+    {
+      "sha256": "c603c2c010551e45c5ca697ce4a103fdb9b82b29f54e9854b8fa594915de0275",
+      "url": "https://api.github.com/repos/b1ug/nb1/git/commits/48895be5babc11d6f3b2a7ab16e316bd564e726e"
+    },
+    {
+      "sha256": "93c8daf55cca95586329fa91feaf921ac85921a6c97b50a11fdfd4995e40c314",
+      "url": "https://api.github.com/repos/b1ug/nb1/git/trees/a580d2d26a1c6321cdb7fea7365c321cc98bbdcf?recursive=1"
+    },
+    {
+      "sha256": "f187a3b60c0059ddd787e9c9c8db327d9df5bec8c5d46da4e6fc12323b23dff7",
+      "url": "https://api.github.com/repos/b1ug/nb1/git/ref/tags/v0.1.3"
+    },
+    {
+      "sha256": "88ca93c0f2e9f1828606dc09d9038ca13c3369098ea8efa0acd34d1cb25b136d",
+      "url": "https://api.github.com/repos/b1ug/nb1/git/tags/7bc12c597bdb791611c20b4a694453c048a5b135"
+    },
+    {
+      "sha256": "8a25c235e0ee079429e9c1ee15e621fe0cdcfa950686e8fc76536fdf86a10cb9",
+      "url": "https://api.github.com/repos/b1ug/nb1/releases/tags/v0.1.3"
+    }
+  ],
+  "prepared_at": "2026-11-19T21:22:27.442984+00:00",
+  "published": false,
+  "python": "3.15.1",
+  "release": {
+    "id": 451941688,
+    "immutable": false,
+    "prerelease": false,
+    "published_at": "2026-11-19T21:18:57Z",
+    "tag_name": "v0.1.3"
+  },
+  "release_input": {
+    "components": "nb1-only",
+    "fixture_only": false,
+    "min_macos": "sequoia",
+    "schema_version": 1,
+    "source_commit": "48895be5babc11d6f3b2a7ab16e316bd564e726e",
+    "source_sha256": "08a1ce843c6db0db38e839b1550f37a33a12f1ddde66b04ab6b23c138094e502",
+    "source_url": "https://github.com/b1ug/nb1/archive/refs/tags/v0.1.3.tar.gz",
+    "version": "0.1.3"
+  },
+  "repository": "b1ug/nb1",
+  "ruby_syntax_checked": true,
+  "schema_version": 1,
+  "service_installed": false,
+  "source_commit": "48895be5babc11d6f3b2a7ab16e316bd564e726e",
+  "source_tree": "a580d2d26a1c6321cdb7fea7365c321cc98bbdcf",
+  "tag": "v0.1.3",
+  "tag_objects": [
+    {
+      "sha": "7bc12c597bdb791611c20b4a694453c048a5b135",
+      "type": "tag"
+    },
+    {
+      "sha": "48895be5babc11d6f3b2a7ab16e316bd564e726e",
+      "type": "commit"
+    }
+  ],
+  "upstream_files": {
+    "packaging/homebrew/nb1.rb.in": {
+      "git_blob": "ed1139a49a709ff986f1f5e4386eeefe9809a49f",
+      "sha256": "371c0bc2d655d3e000c5eed0bba2e7f5dc7263d3f90ea33bb1c85240890178d1"
+    },
+    "packaging/homebrew/render_formula.py": {
+      "git_blob": "102a2c8afb30e24ec61dc254eef3cda60bd6d560",
+      "sha256": "e31dd7fa93dde15556ca22f314ed70d7b1c5592ab43c51b5e57854aee8e0e078"
+    }
+  },
+  "upstream_formula_sha256": "4609a81f3fcd7eabddaf9ab31acd826fb46f223b08ecac6ba655a201e7aad23f"
+}

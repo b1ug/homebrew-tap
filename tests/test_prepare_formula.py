@@ -228,8 +228,8 @@ class PreparationTests(unittest.TestCase):
                                  (b"future renderer output", []))
 
     def test_committed_production_formula_has_matching_verified_release_record(self):
-        value = json.loads((ROOT / "releases/nb1-0.1.2.json").read_text())
-        provenance = json.loads((ROOT / "releases/nb1-0.1.2.provenance.json").read_text())
+        value = json.loads((ROOT / "releases/nb1-0.1.3.json").read_text())
+        provenance = json.loads((ROOT / "releases/nb1-0.1.3.provenance.json").read_text())
         formula = (ROOT / "Formula/nb1.rb").read_bytes()
         self.assertIs(value["fixture_only"], False)
         self.assertEqual(provenance["release_input"], value)
@@ -240,7 +240,7 @@ class PreparationTests(unittest.TestCase):
         self.assertIn(value["source_sha256"].encode(), formula)
         self.assertIn(value["source_url"].encode(), formula)
         self.assertIn(value["source_commit"].encode(), formula)
-        self.assertEqual(value["version"], "0.1.2")
+        self.assertEqual(value["version"], "0.1.3")
         self.assertEqual(provenance["upstream_formula_sha256"], provenance["formula_sha256"])
         self.assertEqual(provenance["formula_adaptations"], [])
         self.assertIn(b'"-buildvcs=false"', formula)
@@ -259,7 +259,7 @@ class PreparationTests(unittest.TestCase):
         # The reviewed current release must still originate in its real renderer.
         spec = importlib.util.spec_from_file_location("upstream_renderer", source / producer.RENDERER)
         renderer = importlib.util.module_from_spec(spec); spec.loader.exec_module(renderer)
-        current = json.loads((ROOT / "releases/nb1-0.1.2.json").read_text())
+        current = json.loads((ROOT / "releases/nb1-0.1.3.json").read_text())
         raw = renderer.render(current).encode()
         adapted, changes = producer.adapt_formula(raw, current)
         self.assertEqual(adapted, (ROOT / "Formula/nb1.rb").read_bytes())

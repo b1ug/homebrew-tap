@@ -61,6 +61,9 @@ jobs:
       - name: Build the published source and test the actual installed Formula
         run: |
           brew --version
+          if brew command trust >/dev/null 2>&1; then
+            brew trust --formula b1ug/tap/nb1
+          fi
           brew install --build-from-source b1ug/tap/nb1
           brew test b1ug/tap/nb1
           brew linkage --test b1ug/tap/nb1
@@ -70,11 +73,11 @@ jobs:
           NB1_TAP_EVIDENCE: ${{ runner.temp }}/nb1-tap-install
         run: |
           python3 - <<'PYCODE'
-          import hashlib, json, os, pathlib, subprocess, tarfile
+          import hashlib, importlib.util, json, os, pathlib, subprocess, tarfile, time
           root = pathlib.Path(os.environ["NB1_TAP_SOURCE"])
           output = pathlib.Path(os.environ["NB1_TAP_EVIDENCE"])
           output.mkdir(mode=0o700, exist_ok=False)
-          release = json.loads((root / "releases/nb1-0.1.2.json").read_text())
+          release = json.loads((root / "releases/nb1-0.1.3.json").read_text())
           prefix = pathlib.Path(subprocess.check_output(["brew", "--prefix", "b1ug/tap/nb1"], text=True).strip())
           binary = prefix / "bin/nb1"
           version = json.loads(subprocess.check_output([binary, "version", "--json"], text=True))
@@ -84,7 +87,7 @@ jobs:
           assert version["build"]["cgo_enabled"] is True
           assert version["build"]["revision"] == "" and version["build"]["modified"] == "unknown"
           dependencies = {v["path"]: v["version"] for v in version["build"]["dependencies"]}
-          assert dependencies["github.com/b1ug/blink1-go"] == "v0.0.2"
+          assert dependencies["github.com/b1ug/blink1-go"] == "v0.0.3"
           assert dependencies["github.com/b1ug/gid"] == "v0.0.3"
           go = pathlib.Path(subprocess.check_output(["brew", "--prefix", "go"], text=True).strip()) / "bin/go"
           build_info = subprocess.check_output([go, "version", "-m", binary], text=True)
@@ -98,14 +101,20 @@ jobs:
           (output / "installed-version.json").write_text(json.dumps(version, indent=2) + "\n")
           archive = pathlib.Path(subprocess.check_output(["brew", "--cache", "b1ug/tap/nb1"], text=True).strip())
           assert hashlib.sha256(archive.read_bytes()).hexdigest() == release["source_sha256"]
-          member_name = "nb1-" + release["version"] + "/ci/daemon-process-smoke.py"
           with tarfile.open(archive, "r:gz") as source:
-              member = source.getmember(member_name)
-              assert member.isfile() and 0 < member.size < 65536
-              helper = output / "daemon-process-smoke.py"
-              helper.write_bytes(source.extractfile(member).read())
-          subprocess.run(["python3", "-B", str(helper), "--binary", str(binary),
+              for name in ("daemon-process-smoke.py", "mcp-candidate-smoke.py"):
+                  member = source.getmember("nb1-" + release["version"] + "/ci/" + name)
+                  assert member.isfile() and 0 < member.size < 65536
+                  (output / name).write_bytes(source.extractfile(member).read())
+          subprocess.run(["python3", "-B", str(output / "daemon-process-smoke.py"), "--binary", str(binary),
                           "--output", str(output / "offline-daemon"), "--require-no-devices"], check=True)
+          spec = importlib.util.spec_from_file_location("nb1_mcp_smoke", output / "mcp-candidate-smoke.py")
+          adapter = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(adapter)
+          report = {}
+          adapter.smoke(binary, report, time.monotonic(), subcommand=("mcp",))
+          assert report["initialize"]["server_info"]["version"] == version["version"]
+          (output / "mcp.json").write_text(json.dumps(report, indent=2) + "\n")
           PYCODE
       - name: Preserve native installation evidence
         if: always()

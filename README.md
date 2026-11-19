@@ -12,13 +12,13 @@ nb1 list
 nb1 server --devices YOUR_DEVICE_SERIAL
 ```
 
-Open <http://127.0.0.1:8931/demo/> for the embedded English/Chinese debugger.
+Open <http://127.0.0.1:5885/demo/> for the embedded English/Chinese debugger.
 The workbench, 3D preview and API are part of the same executable; no Node server
 or browser USB permission is required. Preview is optional; Play controls the light.
 
 ## Supported installation
 
-The Formula builds the published [nb1 v0.1.2 source](https://github.com/b1ug/nb1/releases/tag/v0.1.2)
+The Formula builds the published [nb1 v0.1.3 source](https://github.com/b1ug/nb1/releases/tag/v0.1.3)
 with Homebrew's Go dependency (Go 1.27.4 or newer) and a native C compiler.
 It requires macOS 15 or newer on Mac; Linux follows Homebrew's supported Linux
 build environment. It is a source installation, not a prebuilt bottle. The
@@ -30,8 +30,9 @@ settings; the embedded workbench has its own English/Chinese switch. `NO_COLOR=1
 disables terminal styling. The application source minimum is Go 1.25.8; the
 Formula deliberately uses the newer build toolchain stated above.
 
-The matching optional `nb1-mcp` and Agent Skill are separate
-[release downloads](https://github.com/b1ug/nb1/releases/tag/v0.1.2), not bundled by this Formula.
+Launch MCP over stdio with `nb1 mcp`. When upgrading an existing agent, change the executable from `nb1-mcp` to `nb1` and add `mcp` before its existing arguments. The [Agent Skill](https://github.com/b1ug/nb1/releases/tag/v0.1.3) is a separate download.
+
+The default port moved from 8931 to 5885. Existing explicit listeners and client endpoints take precedence. Keep them together when migrating a service.
 
 Installation does not start a server or register a service. Keep the foreground
 `nb1 server` while trying the debugger. For an explicitly managed user service:
@@ -47,6 +48,17 @@ service without `--start`. Management uses macOS LaunchAgent or Linux systemd
 user services. A Linux container without a user systemd manager cannot run that
 managed-service path; foreground `nb1 server` still works. This Formula does not
 provide `brew services` integration.
+
+## Choosing a device
+
+The daemon can own several configured devices. Without an explicit target, CLI
+control commands use the configured default; otherwise they choose the first
+online serial in byte order. With multiple configured devices, automatic choice
+announces the count and selected serial on stderr. This is serial order, not USB
+insertion order. Use
+`--device SERIAL` to choose another device. A busy or missing explicit target
+never silently redirects playback to another light. The embedded workbench keeps
+your selection through refresh and language changes, including offline targets.
 
 ## Upgrade and remove
 
@@ -67,11 +79,11 @@ run `nb1 service uninstall --stop`, then `brew uninstall nb1`.
 ## Release provenance
 
 `Formula/nb1.rb` is the unchanged output of the renderer/template in the
-verified published v0.1.2 source. Its source-archive build disables unrelated
+verified published v0.1.3 source. Its source-archive build disables unrelated
 parent-repository VCS stamping. Human `nb1 version` output still includes the
 explicit nb1 source commit; the JSON VCS revision remains unknown for this build.
 
-[`releases/nb1-0.1.2.json`](releases/nb1-0.1.2.json) contains the explicit input.
+[`releases/nb1-0.1.3.json`](releases/nb1-0.1.3.json) contains the explicit input.
 The adjacent provenance binds the public Release, tag object, exact source
 commit/tree, source archive and renderer/template hashes to the Formula. The raw
 renderer output and committed Formula have identical hashes and no adaptations.
@@ -80,8 +92,9 @@ No branch, Actions artifact or synthetic fixture is an installation source.
 The original [v0.1.0 input](releases/nb1-0.1.0.json) and its provenance retain
 the four exact-hash-bound packaging corrections required by that initial
 release. Those historical records and the narrowly scoped adapter are preserved;
-the corrections are not applied to v0.1.1 or v0.1.2. The verified
-[v0.1.1 input and provenance](releases/nb1-0.1.1.json) are also preserved.
+the corrections do not apply to later releases. The verified
+[v0.1.1](releases/nb1-0.1.1.json) and
+[v0.1.2](releases/nb1-0.1.2.json) inputs and provenance are also preserved.
 
 The preparation tool checks the public Release, tag, source archive and every
 archived Git blob before calling that release's renderer:
@@ -106,5 +119,5 @@ Native macOS/Linux CI builds the real released source, runs the Formula's
 USB-free tests, verifies installed version/source and exercises an offline daemon.
 A successful software check is not physical USB, MK3, login or reboot acceptance.
 
-[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.2/docs/install.md)
+[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.3/docs/install.md)
 · [Homebrew support requirements](https://docs.brew.sh/Installation)

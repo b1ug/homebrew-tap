@@ -73,11 +73,15 @@ jobs:
           NB1_TAP_EVIDENCE: ${{ runner.temp }}/nb1-tap-install
         run: |
           python3 - <<'PYCODE'
-          import hashlib, importlib.util, json, os, pathlib, subprocess, tarfile, time
+          import hashlib, importlib.util, json, os, pathlib, re, subprocess, tarfile, time
           root = pathlib.Path(os.environ["NB1_TAP_SOURCE"])
           output = pathlib.Path(os.environ["NB1_TAP_EVIDENCE"])
           output.mkdir(mode=0o700, exist_ok=False)
-          release = json.loads((root / "releases/nb1-0.1.3.json").read_text())
+          formula = (root / "Formula/nb1.rb").read_text()
+          match = re.search(r'url "https://github\.com/b1ug/nb1/archive/refs/tags/v([^\"]+)\.tar\.gz"', formula)
+          assert match is not None, "the production Formula must use an exact nb1 source tag"
+          release = json.loads((root / f"releases/nb1-{match.group(1)}.json").read_text())
+          assert release["version"] == match.group(1)
           prefix = pathlib.Path(subprocess.check_output(["brew", "--prefix", "b1ug/tap/nb1"], text=True).strip())
           binary = prefix / "bin/nb1"
           version = json.loads(subprocess.check_output([binary, "version", "--json"], text=True))

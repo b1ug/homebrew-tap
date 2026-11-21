@@ -18,7 +18,7 @@ or browser USB permission is required. Preview is optional; Play controls the li
 
 ## Supported installation
 
-The Formula builds the published [nb1 v0.1.3 source](https://github.com/b1ug/nb1/releases/tag/v0.1.3)
+The Formula builds the published [nb1 v0.1.4 source](https://github.com/b1ug/nb1/releases/tag/v0.1.4)
 with Homebrew's Go dependency (Go 1.27.4 or newer) and a native C compiler.
 It requires macOS 15 or newer on Mac; Linux follows Homebrew's supported Linux
 build environment. It is a source installation, not a prebuilt bottle. The
@@ -30,7 +30,7 @@ settings; the embedded workbench has its own English/Chinese switch. `NO_COLOR=1
 disables terminal styling. The application source minimum is Go 1.25.8; the
 Formula deliberately uses the newer build toolchain stated above.
 
-Launch MCP over stdio with `nb1 mcp`. When upgrading an existing agent, change the executable from `nb1-mcp` to `nb1` and add `mcp` before its existing arguments. The [Agent Skill](https://github.com/b1ug/nb1/releases/tag/v0.1.3) is a separate download.
+Launch MCP over stdio with `nb1 mcp`. When upgrading an existing agent, change the executable from `nb1-mcp` to `nb1` and add `mcp` before its existing arguments. v0.1.4 adds per-device `reject`, `queue` and `preempt` policies plus guarded MK2 Flash startup-preset reset (`nb1 device reset SERIAL [off|rainbow|starlight|fireflies]`). The [Agent Skill](https://github.com/b1ug/nb1/releases/tag/v0.1.4) is a separate download.
 
 The default port moved from 8931 to 5885. Existing explicit listeners and client endpoints take precedence. Keep them together when migrating a service.
 
@@ -79,11 +79,11 @@ run `nb1 service uninstall --stop`, then `brew uninstall nb1`.
 ## Release provenance
 
 `Formula/nb1.rb` is the unchanged output of the renderer/template in the
-verified published v0.1.3 source. Its source-archive build disables unrelated
+verified published v0.1.4 source. Its source-archive build disables unrelated
 parent-repository VCS stamping. Human `nb1 version` output still includes the
 explicit nb1 source commit; the JSON VCS revision remains unknown for this build.
 
-[`releases/nb1-0.1.3.json`](releases/nb1-0.1.3.json) contains the explicit input.
+[`releases/nb1-0.1.4.json`](releases/nb1-0.1.4.json) contains the explicit input.
 The adjacent provenance binds the public Release, tag object, exact source
 commit/tree, source archive and renderer/template hashes to the Formula. The raw
 renderer output and committed Formula have identical hashes and no adaptations.
@@ -94,7 +94,8 @@ the four exact-hash-bound packaging corrections required by that initial
 release. Those historical records and the narrowly scoped adapter are preserved;
 the corrections do not apply to later releases. The verified
 [v0.1.1](releases/nb1-0.1.1.json) and
-[v0.1.2](releases/nb1-0.1.2.json) inputs and provenance are also preserved.
+[v0.1.2](releases/nb1-0.1.2.json) and [v0.1.3](releases/nb1-0.1.3.json)
+inputs and provenance are also preserved.
 
 The preparation tool checks the public Release, tag, source archive and every
 archived Git blob before calling that release's renderer:
@@ -119,5 +120,5 @@ Native macOS/Linux CI builds the real released source, runs the Formula's
 USB-free tests, verifies installed version/source and exercises an offline daemon.
 A successful software check is not physical USB, MK3, login or reboot acceptance.
 
-[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.3/docs/install.md)
+[Installation guide](https://github.com/b1ug/nb1/blob/v0.1.4/docs/install.md)
 · [Homebrew support requirements](https://docs.brew.sh/Installation)

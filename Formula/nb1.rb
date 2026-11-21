@@ -6,8 +6,8 @@ require "rubygems"
 class Nb1 < Formula
   desc "Control blink(1) through a local CLI and daemon"
   homepage "https://github.com/b1ug/nb1"
-  url "https://github.com/b1ug/nb1/archive/refs/tags/v0.1.3.tar.gz"
-  sha256 "08a1ce843c6db0db38e839b1550f37a33a12f1ddde66b04ab6b23c138094e502"
+  url "https://github.com/b1ug/nb1/archive/refs/tags/v0.1.4.tar.gz"
+  sha256 "afffbfe93df0c6d9490d3068fbfe2083deed36050c79c4ccf489c616861d07c3"
   license "MIT"
 
   depends_on "go" => :build
@@ -31,7 +31,7 @@ class Nb1 < Formula
     ENV["GOWORK"] = "off"
     ENV["GOTOOLCHAIN"] = "local"
     check_go_version
-    ldflags = ["-X", "github.com/b1ug/nb1/config.GitCommit=" + "48895be5babc11d6f3b2a7ab16e316bd564e726e",
+    ldflags = ["-X", "github.com/b1ug/nb1/config.GitCommit=" + "0a2199cab89621888782baa154522c37ad83b641",
                "-X", "github.com/b1ug/nb1/config.GitSummary=v#{version}",
                "-X", "github.com/b1ug/nb1/config.ServiceBinary=#{opt_bin}/nb1",
                "-X", "github.com/b1ug/nb1/config.ServiceBinaryRoot=#{rack}"]

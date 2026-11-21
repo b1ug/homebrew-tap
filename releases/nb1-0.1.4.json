@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "fixture_only": false,
+  "version": "0.1.4",
+  "source_url": "https://github.com/b1ug/nb1/archive/refs/tags/v0.1.4.tar.gz",
+  "source_sha256": "afffbfe93df0c6d9490d3068fbfe2083deed36050c79c4ccf489c616861d07c3",
+  "source_commit": "0a2199cab89621888782baa154522c37ad83b641",
+  "min_macos": "sequoia",
+  "components": "nb1-only"
+}
